@@ -13,6 +13,11 @@ db_url = 'sqlite:///{}/test_database.db'.format(basedir)
 
 Base = declarative_base()
 
+
+def row2dict(row):
+    return dict((col, getattr(row, col)) for col in row.__table__.columns.keys())
+
+
 def create_tables(engine):
     Base.metadata.create_all(engine)
 
@@ -66,17 +71,18 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
 
-    follows_tracks = relationship('TrackFollow', back_populates='user')
+    sid = Column(String)
+    sdisplay_name = Column(String)
 
     # relationships
-    follows_users = association_proxy('outbound_follows', 'followed')
-    followed_by_users = association_proxy('inbound_follows', 'follower')
+    likes_tracks = association_proxy('outbound_likes', 'track', creator=lambda track: TrackLike(track=track))
+
+    follows_users = association_proxy('outbound_follows', 'followed', creator=lambda followed: UserFollow(followed=followed))
+    followed_by_users = association_proxy('inbound_follows', 'follower', creator=lambda follower: UserFollow(follower=follower))
 
 
 class UserFollow(Base):
     __tablename__ = 'user_follow'
-
-    id = Column(Integer, primary_key=True)
 
     # foreign keys
     follower_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
@@ -114,7 +120,7 @@ class Track(Base):
         secondary=track_artist_association,
         back_populates='tracks'
     )
-    followed_by_users = relationship('TrackFollow', back_populates='track')
+    liked_by_users = association_proxy('inbound_likes', 'user')
 
 
 class Album(Base):
@@ -158,13 +164,13 @@ class Artist(Base):
 
 
 # Assocation Classes
-class TrackFollow(Base):
-    __tablename__ = 'track_follow'
+class TrackLike(Base):
+    __tablename__ = 'track_like'
 
     # foreign keys
     user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
     track_id = Column(Integer, ForeignKey('track.id'), primary_key=True)
 
     # relationships
-    user = relationship('User', back_populates='follows_tracks')
-    track = relationship('Track', back_populates='followed_by_users')
+    user = relationship('User', backref='outbound_likes')
+    track = relationship('Track', backref='inbound_likes')

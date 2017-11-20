@@ -116,7 +116,7 @@ def load_example_user_track_links_file():
     with open(EXAMPLE_USER_TRACK_LINKS_FILENAME, 'r') as handle:
         data = handle.readlines()
 
-    data = [d.strip('\n') for d in data]
+    data = [d.strip('\n').split(',') for d in data]
 
     return data
 
