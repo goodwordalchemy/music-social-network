@@ -16,41 +16,40 @@ def populate_music_entity_data():
     for s_track in s_tracks:
         obs_to_save = []
 
-        with session.no_autoflush:
-            track_obj = get_or_create(session, Track,
-                sid=s_track['id'],
-                name=s_track['name'],
-                popularity=s_track['popularity'],
-                uri=s_track['uri'],
-                href=s_track['href']
+        track_obj = get_or_create(session, Track,
+            sid=s_track['id'],
+            name=s_track['name'],
+            popularity=s_track['popularity'],
+            uri=s_track['uri'],
+            href=s_track['href']
+        )
+        obs_to_save.append(track_obj)
+
+        s_album = s_track['album']
+
+        album_obj = get_or_create(session, Album,
+            sid=s_album['id'],
+            name=s_album['name'],
+            uri=s_album['uri']
+        )
+        obs_to_save.append(album_obj)
+
+        track_obj.album = album_obj
+
+        s_artists = s_track['artists']
+
+        for s_artist in s_artists:
+            artist_obj = get_or_create(session, Artist,
+                sid=s_artist['id'],
+                name=s_artist['name'],
+                uri=s_artist['uri']
             )
-            obs_to_save.append(track_obj)
+            obs_to_save.append(artist_obj)
 
-            s_album = s_track['album']
+            track_obj.artists.append(artist_obj)
 
-            album_obj = get_or_create(session, Album,
-                sid=s_album['id'],
-                name=s_album['name'],
-                uri=s_album['uri']
-            )
-            obs_to_save.append(album_obj)
-
-            track_obj.album = album_obj
-
-            s_artists = s_track['artists']
-
-            for s_artist in s_artists:
-                artist_obj = get_or_create(session, Artist,
-                    sid=s_artist['id'],
-                    name=s_artist['name'],
-                    uri=s_artist['uri']
-                )
-                obs_to_save.append(artist_obj)
-
-                track_obj.artists.append(artist_obj)
-
-            session.add_all(obs_to_save)
-            session.commit()
+        session.add_all(obs_to_save)
+        session.commit()
 
     session.close()
 
