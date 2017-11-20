@@ -41,10 +41,8 @@ class User(Base):
     follows_tracks = relationship('TrackFollow', back_populates='user')
 
     # relationships
-
-    #  TODO: Use Association Proxy Pattern -- http://docs.sqlalchemy.org/en/latest/orm/extensions/associationproxy.html
-    # follows_users = ...
-    # followed_by_users = ...
+    follows_users = association_proxy('outbound_follows', 'followed')
+    followed_by_users = association_proxy('inbound_follows', 'follower')
 
 
 class UserFollow(Base):
@@ -59,11 +57,11 @@ class UserFollow(Base):
     # relationships
     follower = relationship('User',
         primaryjoin=(follower_id == User.id),
-        backref='follows_users'
+        backref='outbound_follows'
     )
     followed = relationship('User',
         primaryjoin=(followed_id == User.id),
-        backref='followed_by_user'
+        backref='inbound_follows'
     )
 
 
