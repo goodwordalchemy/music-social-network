@@ -1,4 +1,4 @@
-from models import get_or_create, Session, Track, TrackFollow, User, UserFollow
+from models import reset, get_session, get_or_create, Track, TrackFollow, User, UserFollow, Album, Artist
 
 from .json_cache import (
     load_example_track_objcts_json_file,
@@ -7,7 +7,7 @@ from .json_cache import (
 )
 
 def populate_music_entity_data():
-    session = Session()
+    session = get_session()
 
     s_tracks = load_example_track_objcts_json_file()
 
@@ -24,7 +24,7 @@ def populate_music_entity_data():
         )
         obs_to_save.append(track_obj)
 
-        s_album = s_track=['album']
+        s_album = s_track['album']
 
         album_obj = get_or_create(session, Album,
             sid=s_album['id'],
@@ -35,11 +35,11 @@ def populate_music_entity_data():
 
         track_obj.album = album_obj
 
-        s_artists = s_track['arists']
+        s_artists = s_track['artists']
 
         for s_artist in s_artists:
             artist_obj = Artist(
-                sid=s_artist['sid'],
+                sid=s_artist['id'],
                 name=s_artist['name'],
                 uri=s_artist['uri']
             )
@@ -52,6 +52,7 @@ def populate_music_entity_data():
 
 
 def main():
+    reset()
     populate_music_entity_data()
 
 
