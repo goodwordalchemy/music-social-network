@@ -79,15 +79,16 @@ def populate_track_like_data():
     for lt in link_tups:
         user_sid, track_sid = lt
 
-        with session.no_autoflush:
-            user = session.query(User).filter_by(sid=user_sid).first()
-            track = session.query(Track).filter_by(sid=track_sid).first()
+        user = session.query(User).filter_by(sid=user_sid).first()
+        track = session.query(Track).filter_by(sid=track_sid).first()
 
-        like = TrackLike(user=user, track=track)
+        like = get_or_create(session, TrackLike,
+            user=user, track=track
+        )
 
         session.add(like)
+        session.commit()
 
-    session.commit()
     session.close()
 
 
