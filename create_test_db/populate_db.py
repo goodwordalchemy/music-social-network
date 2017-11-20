@@ -1,54 +1,56 @@
 from models import reset, get_session, get_or_create, Track, TrackLike, User, UserFollow, Album, Artist
 
+
 from .json_cache import (
     load_example_track_objcts_json_file,
     load_example_user_objects_json_file,
     load_example_user_track_links_file
 )
 
+
 def populate_music_entity_data():
     session = get_session()
 
     s_tracks = load_example_track_objcts_json_file()
 
-    obs_to_save = []
-
     for s_track in s_tracks:
+        obs_to_save = []
 
-        track_obj = get_or_create(session, Track,
-            sid=s_track['id'],
-            name=s_track['name'],
-            popularity=s_track['popularity'],
-            uri=s_track['uri'],
-            href=s_track['href']
-        )
-        obs_to_save.append(track_obj)
-
-        s_album = s_track['album']
-
-        album_obj = get_or_create(session, Album,
-            sid=s_album['id'],
-            name=s_album['name'],
-            uri=s_album['uri']
-        )
-        obs_to_save.append(album_obj)
-
-        track_obj.album = album_obj
-
-        s_artists = s_track['artists']
-
-        for s_artist in s_artists:
-            artist_obj = get_or_create(session, Artist,
-                sid=s_artist['id'],
-                name=s_artist['name'],
-                uri=s_artist['uri']
+        with session.no_autoflush:
+            track_obj = get_or_create(session, Track,
+                sid=s_track['id'],
+                name=s_track['name'],
+                popularity=s_track['popularity'],
+                uri=s_track['uri'],
+                href=s_track['href']
             )
-            obs_to_save.append(artist_obj)
+            obs_to_save.append(track_obj)
 
-            track_obj.artists.append(artist_obj)
+            s_album = s_track['album']
 
-        session.add_all(obs_to_save)
-        session.commit()
+            album_obj = get_or_create(session, Album,
+                sid=s_album['id'],
+                name=s_album['name'],
+                uri=s_album['uri']
+            )
+            obs_to_save.append(album_obj)
+
+            track_obj.album = album_obj
+
+            s_artists = s_track['artists']
+
+            for s_artist in s_artists:
+                artist_obj = get_or_create(session, Artist,
+                    sid=s_artist['id'],
+                    name=s_artist['name'],
+                    uri=s_artist['uri']
+                )
+                obs_to_save.append(artist_obj)
+
+                track_obj.artists.append(artist_obj)
+
+            session.add_all(obs_to_save)
+            session.commit()
 
     session.close()
 
@@ -78,8 +80,9 @@ def populate_track_like_data():
     for lt in link_tups:
         user_sid, track_sid = lt
 
-        user = session.query(User).filter_by(sid=user_sid).first()
-        track = session.query(Track).filter_by(sid=track_sid).first()
+        with session.no_autoflush:
+            user = session.query(User).filter_by(sid=user_sid).first()
+            track = session.query(Track).filter_by(sid=track_sid).first()
 
         like = TrackLike(user=user, track=track)
 

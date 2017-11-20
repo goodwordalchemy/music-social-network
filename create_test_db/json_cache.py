@@ -76,12 +76,23 @@ def save_example_track_objects_and_likes_to_files():
 
         playlists = api.get('users/{}/playlists'.format(uuid))
 
-        for idx in range(len(playlists)):
-            num_tracks = playlists[idx]['tracks']['total']
+        if not playlists:
+            continue
+
+        idx = -1
+        for _idx in range(len(playlists)):
+            num_tracks = playlists[_idx]['tracks']['total']
             if num_tracks < 100 and num_tracks > 1:
+                idx = _idx
                 break
 
-        first_playlist_id = playlists[idx]['id']
+        if idx < 0:
+            continue
+
+        try:
+            first_playlist_id = playlists[idx]['id']
+        except:
+            import ipdb; ipdb.set_trace()
         first_playlist_owner_id = playlists[idx]['owner']['id']
 
         playlist_url = 'users/{}/playlists/{}/tracks'.format(
@@ -94,8 +105,6 @@ def save_example_track_objects_and_likes_to_files():
         track_objects.extend(playlist_tracks)
 
         likes.extend([(uuid, track['id']) for track in track_objects])
-
-        break
 
     with open(EXAMPLE_SPOTIFY_TRACK_OBJECTS_FILENAME, 'w') as handle:
         json.dump(track_objects, handle)

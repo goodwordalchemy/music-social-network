@@ -9,7 +9,7 @@ from sqlalchemy.orm import backref, sessionmaker, relationship
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-db_url = 'sqlite:///{}/test_database.db'.format(basedir)
+db_url = 'sqlite:///{}/data/test_database.db'.format(basedir)
 
 Base = declarative_base()
 
