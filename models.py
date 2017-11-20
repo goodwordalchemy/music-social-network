@@ -1,9 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, create_engine, Table, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declarative_base
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import backref, sessionmaker
+from sqlalchemy.orm import backref, sessionmaker, relationship
 
 engine = create_engine('sqlite:///:memory:', echo=True)
 
@@ -43,14 +41,10 @@ class User(Base):
     follows_tracks = relationship('TrackFollow', back_populates='user')
 
     # relationships
-    follows_users = relationship('UserFollow',
-        primaryjoin=lambda : (id==UserFollow.follower_id),  # primaryjoin='id == user_follow.follower_id',
-        backref='follower'
-    )
-    followed_by_users = relationship('UserFollow',
-        primaryjoin=lambda : (id==UserFollow.followed_id),  # primaryjoin='id == user_follow.followed_id',
-        backref='followed'
-    )
+
+    #  TODO: Use Association Proxy Pattern -- http://docs.sqlalchemy.org/en/latest/orm/extensions/associationproxy.html
+    # follows_users = ...
+    # followed_by_users = ...
 
 
 class UserFollow(Base):
@@ -63,14 +57,14 @@ class UserFollow(Base):
     followed_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
 
     # relationships
-    # follower = relationship('User',
-    #     primaryjoin=lambda : (follower_id == User.id),
-    #     backref='follows_users'
-    # )
-    # followed = relationship('User',
-    #     primaryjoin= lambda : (followed_id == User.id),
-    #     backref='followed_by_user'
-    # )
+    follower = relationship('User',
+        primaryjoin=(follower_id == User.id),
+        backref='follows_users'
+    )
+    followed = relationship('User',
+        primaryjoin=(followed_id == User.id),
+        backref='followed_by_user'
+    )
 
 
 class Track(Base):
