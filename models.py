@@ -1,11 +1,24 @@
+import os
+
 from sqlalchemy import Column, Integer, ForeignKey, create_engine, Table, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, sessionmaker, relationship
 
-engine = create_engine('sqlite:///:memory:', echo=True)
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+db_url = 'sqlite://{}/test_database.db'.format(basedir)
+print(db_url)
+
+engine = create_engine(db_url, echo=True)
 
 Session = sessionmaker(bind=engine)
+
+Base = declarative_base()
+
+Base.metadata.create_all(engine)
+
 
 
 def get_or_create(session, model, **kwargs):
@@ -16,9 +29,6 @@ def get_or_create(session, model, **kwargs):
     else:
         return model(**kwargs)
 
-
-# Database and Models
-Base = declarative_base()
 
 # Association Tables
 track_artist_association = Table('track_artist', Base.metadata,
@@ -140,6 +150,3 @@ class TrackFollow(Base):
     # relationships
     user = relationship('User', back_populates='follows_tracks')
     track = relationship('Track', back_populates='followed_by_users')
-
-
-

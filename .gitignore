@@ -3,3 +3,4 @@ data
 *.pickle
 *.swp
 __pycache__
+test_database.db
