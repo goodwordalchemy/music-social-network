@@ -14,7 +14,9 @@ def index():
 
     session.close()
 
-    return all_users_str
+    print(all_users_str)
+
+    return render_template('index.html')
 
 
 @app.route('/user/<user_id>')
@@ -42,6 +44,7 @@ def show_user_profile(user_id):
         '<div>followed by users: {}</div>'
     ).format(likes_tracks_str, follows_users_str, followed_by_users_str)
 
+
 @app.route('/track/<track_id>')
 def show_track_profile(track_id):
     session = get_session()
@@ -54,9 +57,6 @@ def show_track_profile(track_id):
     session.close()
 
     return '<div>liked by users: {}</div>'.format(liked_by_users_str)
-
-
-
 
 
 if __name__ == '__main__':
