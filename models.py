@@ -1,5 +1,6 @@
 import os
 
+import sqlalchemy
 from sqlalchemy import Column, Integer, ForeignKey, create_engine, Table, String
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declarative_base
@@ -8,16 +9,33 @@ from sqlalchemy.orm import backref, sessionmaker, relationship
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-db_url = 'sqlite://{}/test_database.db'.format(basedir)
-print(db_url)
-
-engine = create_engine(db_url, echo=True)
-
-Session = sessionmaker(bind=engine)
+db_url = 'sqlite:///{}/test_database.db'.format(basedir)
 
 Base = declarative_base()
 
-Base.metadata.create_all(engine)
+def create_tables(engine):
+    Base.metadata.create_all(engine)
+
+
+def db_connect():
+    return create_engine(db_url)
+
+
+def get_session(engine=None):
+    if engine is None:
+        engine = db_connect()
+
+    Session = sessionmaker(bind=engine)
+
+    return Session()
+
+
+def reset():
+    engine = db_connect()
+    meta = sqlalchemy.MetaData(engine)
+    meta.reflect()
+    meta.drop_all()
+    create_tables(engine)
 
 
 
