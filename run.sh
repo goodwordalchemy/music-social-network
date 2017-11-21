@@ -1,3 +1,1 @@
-webpack --watch
-
-python -m app
+webpack --watch & python -m app
