@@ -7,3 +7,4 @@ test_database.db
 node_modules/
 package-lock.json
 static/js/dist/
+venv/
